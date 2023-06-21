@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_record/config/app_asset.dart';
 import 'package:money_record/config/app_color.dart';
+import 'package:money_record/config/app_format.dart';
 import 'package:money_record/config/session.dart';
+import 'package:money_record/presentation/controller/c_home.dart';
 import 'package:money_record/presentation/page/auth/login_page.dart';
 import '../controller/c_user.dart';
 
@@ -17,6 +19,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final cUser = Get.put(CUser());
+  final cHome = Get.put(CHome());
+
+  void initState() {
+    cHome.getAnalysis(cUser.data.idUser!);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,16 +235,39 @@ class _HomePageState extends State<HomePage> {
           height: MediaQuery.of(context).size.width * 0.5,
           child: Stack(
             children: [
-              DChartPie(
-                data: [
-                  {'domain': 'Flutter', 'measure': 28},
-                  {'domain': 'React Native', 'measure': 27},
-                ],
-                fillColor: (pieData, index) => Colors.purple,
-                donutWidth: 30,
-                labelColor: Colors.white,
-              ),
-              Center(child: const Text('60%')),
+              Obx(() {
+                return DChartPie(
+                  data: [
+                    {'domain': 'income', 'measure': cHome.monthIncome},
+                    {'domain': 'outcome', 'measure': cHome.monthOutcome},
+                    if (cHome.monthIncome == 0 && cHome.monthOutcome == 0)
+                      {'domain': 'nol', 'measure': 1},
+                  ],
+                  fillColor: (pieData, index) {
+                    switch (pieData['domain']) {
+                      case 'income':
+                        return AppColor.primary;
+                      case 'outcome':
+                        return AppColor.chart;
+                      default:
+                        return AppColor.bg.withOpacity(0.5);
+                    }
+                  },
+                  donutWidth: 20,
+                  labelColor: Colors.transparent,
+                  showLabelLine: false,
+                );
+              }),
+              Center(
+                child: Obx(() {
+                  return Text(
+                    '${cHome.percentIncome}%',
+                    style: Theme.of(context).textTheme.headline4!.copyWith(
+                          color: AppColor.primary,
+                        ),
+                  );
+                }),
+              )
             ],
           ),
         ),
@@ -266,18 +298,20 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             DView.spaceHeight(20),
-            Text('Pemasukan'),
-            Text('lebih besar 20%'),
-            Text('dari pengeluaran'),
+            Obx(() {
+              return Text(cHome.monthPercent);
+            }),
             DView.spaceHeight(10),
-            Text("Atau setra: "),
-            Text(
-              'Rp. 20.000,00',
-              style: TextStyle(
-                  color: AppColor.primary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            )
+            Text("Atau setara: "),
+            Obx(() {
+              return Text(
+                AppFormat.currency(cHome.differentMonth.toString()),
+                style: const TextStyle(
+                    color: AppColor.primary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              );
+            })
           ],
         )
       ],
@@ -287,27 +321,27 @@ class _HomePageState extends State<HomePage> {
   AspectRatio weekly() {
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: DChartBar(
-        data: [
-          {
-            'id': 'Bar',
-            'data': [
-              {'domain': '2020', 'measure': 3},
-              {'domain': '2021', 'measure': 4},
-              {'domain': '2022', 'measure': 6},
-              {'domain': '2023', 'measure': 0.3},
-            ],
-          },
-        ],
-        domainLabelPaddingToAxisLine: 16,
-        axisLineTick: 2,
-        axisLinePointTick: 2,
-        axisLinePointWidth: 10,
-        axisLineColor: AppColor.primary,
-        measureLabelPaddingToAxisLine: 16,
-        barColor: (barData, index, id) => AppColor.primary,
-        showBarValue: true,
-      ),
+      child: Obx(() {
+        return DChartBar(
+          data: [
+            {
+              'id': 'Bar',
+              'data': List.generate(7, (index) {
+                return {
+                  'domain': cHome.weekText()[index],
+                  'measure': cHome.week[index]
+                };
+              })
+            },
+          ],
+          domainLabelPaddingToAxisLine: 8,
+          axisLineTick: 2,
+          axisLineColor: AppColor.primary,
+          measureLabelPaddingToAxisLine: 16,
+          barColor: (barData, index, id) => AppColor.primary,
+          showBarValue: true,
+        );
+      }),
     );
   }
 
@@ -322,18 +356,22 @@ class _HomePageState extends State<HomePage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-            child: Text(
-              'RP. 500.000',
-              style: Theme.of(context).textTheme.headline4!.copyWith(
-                  fontWeight: FontWeight.bold, color: AppColor.secondary),
-            ),
+            child: Obx(() {
+              return Text(
+                AppFormat.currency(cHome.today.toString()),
+                style: Theme.of(context).textTheme.headline4!.copyWith(
+                    fontWeight: FontWeight.bold, color: AppColor.secondary),
+              );
+            }),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
-            child: Text(
-              '+20% dibanding kemarin',
-              style: TextStyle(color: AppColor.bg, fontSize: 16),
-            ),
+            child: Obx(() {
+              return Text(
+                cHome.todayPercent,
+                style: const TextStyle(color: AppColor.bg, fontSize: 16),
+              );
+            }),
           ),
           Container(
             margin: EdgeInsets.fromLTRB(16, 0, 0, 16),
