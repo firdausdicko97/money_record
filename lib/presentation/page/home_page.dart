@@ -8,6 +8,7 @@ import 'package:money_record/config/app_format.dart';
 import 'package:money_record/config/session.dart';
 import 'package:money_record/presentation/controller/c_home.dart';
 import 'package:money_record/presentation/page/auth/login_page.dart';
+import 'package:money_record/presentation/page/hittory/add_history_page.dart';
 import '../controller/c_user.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,103 +31,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         //membuat menu drawer
-        endDrawer: Drawer(
-          child: ListView(
-            children: [
-              DrawerHeader(
-                margin: EdgeInsets.only(bottom: 0),
-                padding: EdgeInsets.fromLTRB(20, 16, 16, 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //row drawer yang berisi foto, nama, email dan button logout
-                    Row(
-                      children: [
-                        Image.asset(AppAsset.profile),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Obx(() {
-                                return Text(cUser.data.name ?? '',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                    ));
-                              }),
-                              Obx(() {
-                                return Text(cUser.data.email ?? '',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w300,
-                                      fontSize: 16,
-                                    ));
-                              })
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Material(
-                      color: AppColor.primary,
-                      borderRadius: BorderRadius.circular(30),
-                      child: InkWell(
-                        onTap: () {
-                          Session.clearUser();
-                          Get.off(() => const LoginPage());
-                        },
-                        child: const Padding(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              //drawer menus
-              ListTile(
-                onTap: () {},
-                leading: const Icon(Icons.add),
-                horizontalTitleGap: 0,
-                title: const Text('Tambah Baru'),
-                trailing: const Icon(Icons.navigate_next),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                onTap: () {},
-                leading: const Icon(Icons.south_west),
-                horizontalTitleGap: 0,
-                title: const Text('Pemasukan'),
-                trailing: const Icon(Icons.navigate_next),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                onTap: () {},
-                leading: const Icon(Icons.north_east),
-                horizontalTitleGap: 0,
-                title: const Text('Pengeluaran'),
-                trailing: const Icon(Icons.navigate_next),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                onTap: () {},
-                leading: const Icon(Icons.history),
-                horizontalTitleGap: 0,
-                title: const Text('Riwayat'),
-                trailing: const Icon(Icons.navigate_next),
-              ),
-              const Divider(height: 1),
-            ],
-          ),
-        ),
+        endDrawer: drawer(),
         body: Column(
           children: [
             Padding(
@@ -225,6 +130,112 @@ class _HomePageState extends State<HomePage> {
             )),
           ],
         ));
+  }
+
+  Drawer drawer() {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            margin: EdgeInsets.only(bottom: 0),
+            padding: EdgeInsets.fromLTRB(20, 16, 16, 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                //row drawer yang berisi foto, nama, email dan button logout
+                Row(
+                  children: [
+                    Image.asset(AppAsset.profile),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Obx(() {
+                            return Text(cUser.data.name ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ));
+                          }),
+                          Obx(() {
+                            return Text(cUser.data.email ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 16,
+                                ));
+                          })
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Material(
+                  color: AppColor.primary,
+                  borderRadius: BorderRadius.circular(30),
+                  child: InkWell(
+                    onTap: () {
+                      Session.clearUser();
+                      Get.off(() => const LoginPage());
+                    },
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      child: Text(
+                        'Logout',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          //drawer menus
+          ListTile(
+            onTap: () {
+              Get.to(() => const AddHistoryPage())?.then((value) {
+                if (value ?? false) {
+                  cHome.getAnalysis(cUser.data.idUser!);
+                }
+              });
+            },
+            leading: const Icon(Icons.add),
+            horizontalTitleGap: 0,
+            title: const Text('Tambah Baru'),
+            trailing: const Icon(Icons.navigate_next),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            onTap: () {},
+            leading: const Icon(Icons.south_west),
+            horizontalTitleGap: 0,
+            title: const Text('Pemasukan'),
+            trailing: const Icon(Icons.navigate_next),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            onTap: () {},
+            leading: const Icon(Icons.north_east),
+            horizontalTitleGap: 0,
+            title: const Text('Pengeluaran'),
+            trailing: const Icon(Icons.navigate_next),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            onTap: () {},
+            leading: const Icon(Icons.history),
+            horizontalTitleGap: 0,
+            title: const Text('Riwayat'),
+            trailing: const Icon(Icons.navigate_next),
+          ),
+          const Divider(height: 1),
+        ],
+      ),
+    );
   }
 
   Row monthly(BuildContext context) {
