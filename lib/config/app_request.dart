@@ -23,7 +23,6 @@ class AppRequest {
       http.Response response =
           await http.post(Uri.parse(url), body: body, headers: headers);
       DMethod.printTitle('try - $url', response.body);
-
       Map responseBody = jsonDecode(response.body);
       return responseBody;
     } catch (e) {
