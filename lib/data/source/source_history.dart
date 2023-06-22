@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../config/api.dart';
 import '../../config/app_request.dart';
+import '../model/history.dart';
 
 class SourceHistory {
   static Future<Map> analysis(String idUser) async {
@@ -55,5 +56,41 @@ class SourceHistory {
       DInfo.closeDialog();
     }
     return responseBody['success'];
+  }
+
+  static Future<List<History>> incomeOutcome(String idUser, String type) async {
+    String url = '${api.history}/income_outcome.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'type': type,
+    });
+
+    if (responseBody == null) return [];
+
+    if (responseBody['success']) {
+      List list = responseBody['data'];
+      return list.map((e) => History.fromJson(e)).toList();
+    }
+
+    return [];
+  }
+
+  static Future<List<History>> incomeOutcomeSearch(
+      String idUser, String type, String date) async {
+    String url = '${api.history}/income_outcome_search.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'type': type,
+      'date': date,
+    });
+
+    if (responseBody == null) return [];
+
+    if (responseBody['success']) {
+      List list = responseBody['data'];
+      return list.map((e) => History.fromJson(e)).toList();
+    }
+
+    return [];
   }
 }
