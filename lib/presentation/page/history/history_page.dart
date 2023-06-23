@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:d_info/d_info.dart';
 import 'package:d_view/d_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -5,23 +8,47 @@ import 'package:intl/intl.dart';
 import 'package:money_record/config/app_color.dart';
 import 'package:money_record/config/app_format.dart';
 import 'package:money_record/data/model/history.dart';
+import 'package:money_record/data/source/source_history.dart';
 import 'package:money_record/presentation/controller/c_user.dart';
 import 'package:money_record/presentation/controller/history/c_income_outcome.dart';
+import 'package:money_record/presentation/page/history/update_history_page.dart';
 
-class IncomeOutcomePage extends StatefulWidget {
-  const IncomeOutcomePage({Key? key, required this.type});
-  final String type;
+import '../../controller/history/c_history.dart';
+
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({Key? key}) : super(key: key);
 
   @override
-  State<IncomeOutcomePage> createState() => _IncomeOutcomePageState();
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
-  final cInOut = Get.put(CIncomeOutcome());
+class _HistoryPageState extends State<HistoryPage> {
+  final cHistory = Get.put(CHistory());
   final cUser = Get.put(CUser());
   final controllerSearch = TextEditingController();
+
   refresh() {
-    cInOut.getList(cUser.data.idUser, widget.type);
+    cHistory.getList(cUser.data.idUser);
+  }
+
+  delete(idHistory) async {
+    bool? Yes = await DInfo.dialogConfirmation(
+      context,
+      'Hapus',
+      'Yakin untuk menghapus history ini?',
+      textNo: 'Batal',
+      textYes: 'Ya',
+    );
+    //kondisi bool yang sebelumnya nullable dijadikan false dengan variabel baru
+    bool yes = Yes ??
+        false; // Assigns confirmationResult if it's not null, otherwise assigns false as the default value
+
+    if (yes) {
+      bool success = await SourceHistory.delete(idHistory);
+      if (success) {
+        refresh();
+      }
+    }
   }
 
   @override
@@ -30,13 +57,14 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
     super.initState();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
           titleSpacing: 0,
           title: Row(
             children: [
-              Text(widget.type),
+              const Text('Riwayat'),
               Expanded(
                 child: Container(
                   height: 40,
@@ -63,8 +91,8 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                         fillColor: AppColor.chart.withOpacity(0.5),
                         suffixIcon: IconButton(
                           onPressed: () {
-                            cInOut.search(cUser.data.idUser, widget.type,
-                                controllerSearch.text);
+                            cHistory.search(
+                                cUser.data.idUser, controllerSearch.text);
                           },
                           icon: const Icon(Icons.search, color: Colors.white),
                         ),
@@ -78,7 +106,7 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
               )
             ],
           )),
-      body: GetBuilder<CIncomeOutcome>(builder: (_) {
+      body: GetBuilder<CHistory>(builder: (_) {
         if (_.loading) return DView.loadingCircle();
         if (_.list.isEmpty) return DView.empty('Kosong');
         return RefreshIndicator(
@@ -93,10 +121,14 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                   16,
                   index == 0 ? 16 : 8,
                   16,
-                  index == 9 ? 16 : 8,
+                  index == _.list.length - 1 ? 16 : 8,
                 ),
                 child: Row(
                   children: [
+                    DView.spaceWidth(),
+                    history.type == 'Pemasukan'
+                        ? Icon(Icons.south_west, color: Colors.green[300])
+                        : Icon(Icons.north_east, color: Colors.red[300]),
                     DView.spaceWidth(),
                     Text(
                       AppFormat.date(history.date!),
@@ -116,10 +148,12 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                       ),
                       textAlign: TextAlign.center,
                     )),
-                    PopupMenuButton(
-                      itemBuilder: (context) => [],
-                      onSelected: (Value) {},
-                    )
+                    IconButton(
+                        onPressed: () => delete(history.idHistory),
+                        icon: Icon(
+                          Icons.delete_forever,
+                          color: Colors.red[300],
+                        ))
                   ],
                 ),
               );

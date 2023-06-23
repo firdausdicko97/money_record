@@ -93,4 +93,94 @@ class SourceHistory {
 
     return [];
   }
+
+  static Future<History?> whereDate(String idUser, String date) async {
+    String url = '${api.history}/where_date.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'date': date,
+    });
+
+    if (responseBody == null) return null;
+
+    if (responseBody['success']) {
+      var e = responseBody['data'];
+      return History.fromJson(e);
+    }
+
+    return null;
+  }
+
+  static Future<bool> update(String id_history, String idUser, String date,
+      String type, String details, String total) async {
+    String url = '${api.history}/update.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_history': id_history,
+      'id_user': idUser,
+      'date': date,
+      'type': type,
+      'details': details,
+      'total': total,
+      'updated_at': DateTime.now().toIso8601String(),
+    });
+
+    if (responseBody == null) return false;
+
+    if (responseBody['success']) {
+      DInfo.dialogSuccess('Berhasil update history');
+      DInfo.closeDialog();
+    } else {
+      if (responseBody['message'] == 'date') {
+        DInfo.dialogError('Tanggal history ada yang sama');
+      } else {
+        DInfo.dialogError('Gagal update history');
+      }
+      DInfo.closeDialog();
+    }
+    return responseBody['success'];
+  }
+
+  static Future<bool> delete(String idHistory) async {
+    String url = '${api.history}/delete.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_history': idHistory,
+    });
+
+    if (responseBody == null) return false;
+
+    return responseBody['success'];
+  }
+
+  static Future<List<History>> history(String idUser) async {
+    String url = '${api.history}/history.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+    });
+
+    if (responseBody == null) return [];
+
+    if (responseBody['success']) {
+      List list = responseBody['data'];
+      return list.map((e) => History.fromJson(e)).toList();
+    }
+
+    return [];
+  }
+
+  static Future<List<History>> historySearch(String idUser, String date) async {
+    String url = '${api.history}/history_search.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'date': date,
+    });
+
+    if (responseBody == null) return [];
+
+    if (responseBody['success']) {
+      List list = responseBody['data'];
+      return list.map((e) => History.fromJson(e)).toList();
+    }
+
+    return [];
+  }
 }

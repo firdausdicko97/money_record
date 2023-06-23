@@ -6,10 +6,12 @@ import 'package:money_record/config/app_asset.dart';
 import 'package:money_record/config/app_color.dart';
 import 'package:money_record/config/app_format.dart';
 import 'package:money_record/config/session.dart';
+import 'package:money_record/data/model/history.dart';
 import 'package:money_record/presentation/controller/c_home.dart';
 import 'package:money_record/presentation/page/auth/login_page.dart';
-import 'package:money_record/presentation/page/hittory/add_history_page.dart';
-import 'package:money_record/presentation/page/hittory/income_outcome_page.dart';
+import 'package:money_record/presentation/page/history/add_history_page.dart';
+import 'package:money_record/presentation/page/history/history_page.dart';
+import 'package:money_record/presentation/page/history/income_outcome_page.dart';
 import '../controller/c_user.dart';
 
 class HomePage extends StatefulWidget {
@@ -240,7 +242,9 @@ class _HomePageState extends State<HomePage> {
           ),
           const Divider(height: 1),
           ListTile(
-            onTap: () {},
+            onTap: () {
+              Get.to(() => const HistoryPage());
+            },
             leading: const Icon(Icons.history),
             horizontalTitleGap: 0,
             title: const Text('Riwayat'),
