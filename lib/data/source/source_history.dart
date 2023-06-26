@@ -183,4 +183,23 @@ class SourceHistory {
 
     return [];
   }
+
+  static Future<History?> detail(
+      String idUser, String date, String type) async {
+    String url = '${api.history}/detail.php';
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'date': date,
+      'type': type,
+    });
+
+    if (responseBody == null) return null;
+
+    if (responseBody['success']) {
+      var e = responseBody['data'];
+      return History.fromJson(e);
+    }
+
+    return null;
+  }
 }

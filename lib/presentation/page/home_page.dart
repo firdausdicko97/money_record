@@ -2,6 +2,7 @@ import 'package:d_chart/d_chart.dart';
 import 'package:d_view/d_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:money_record/config/app_asset.dart';
 import 'package:money_record/config/app_color.dart';
 import 'package:money_record/config/app_format.dart';
@@ -10,6 +11,7 @@ import 'package:money_record/data/model/history.dart';
 import 'package:money_record/presentation/controller/c_home.dart';
 import 'package:money_record/presentation/page/auth/login_page.dart';
 import 'package:money_record/presentation/page/history/add_history_page.dart';
+import 'package:money_record/presentation/page/history/detail_history_page.dart';
 import 'package:money_record/presentation/page/history/history_page.dart';
 import 'package:money_record/presentation/page/history/income_outcome_page.dart';
 import '../controller/c_user.dart';
@@ -402,27 +404,36 @@ class _HomePageState extends State<HomePage> {
               );
             }),
           ),
-          Container(
-            margin: EdgeInsets.fromLTRB(16, 0, 0, 16),
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  bottomLeft: Radius.circular(8),
-                )),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: const [
-                Text(
-                  'Selengkapnya',
-                  style: TextStyle(color: AppColor.primary),
-                ),
-                Icon(
-                  Icons.navigate_next,
-                  color: AppColor.primary,
-                ),
-              ],
+          GestureDetector(
+            onTap: () {
+              Get.to(() => DetailHistoryPage(
+                    date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                    idUser: cUser.data.idUser!,
+                    type: 'Pengeluaran',
+                  ));
+            },
+            child: Container(
+              margin: EdgeInsets.fromLTRB(16, 0, 0, 16),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                  )),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: const [
+                  Text(
+                    'Selengkapnya',
+                    style: TextStyle(color: AppColor.primary),
+                  ),
+                  Icon(
+                    Icons.navigate_next,
+                    color: AppColor.primary,
+                  ),
+                ],
+              ),
             ),
           )
         ],
